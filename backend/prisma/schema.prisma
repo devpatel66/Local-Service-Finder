@@ -1,0 +1,185 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  user_id              Int       @id @default(autoincrement()) @map("user_id")
+  username             String    @unique
+  email                String    @unique
+  password             String
+  role                 String
+  name                 String?
+  phone                String?
+  address              String?
+  resetPasswordToken   String?
+  resetPasswordExpires DateTime?
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt
+
+  Service Service[]
+  Review  Review[]
+  otp     otp[]
+
+  Booking Booking[]
+
+  Favorite Favorite[]
+
+  Report Report[]
+}
+
+model Service {
+  service_id   Int      @id @default(autoincrement()) @map("service_id")
+  title        String
+  description  String
+  category     String   @map("category")
+  sub_category String   @map("sub_category")
+  price        Int
+  phone_number String
+  email        String
+  address      String
+  state        String
+  district     String
+  location     String
+  status       String
+  provider_id  Int      @map("provider_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt
+
+  provider    User        @relation(fields: [provider_id], references: [user_id])
+  Category    Category    @relation(fields: [category], references: [name])
+  SubCategory SubCategory @relation(fields: [sub_category], references: [name])
+
+  Review Review[]
+
+  ServiceImage ServiceImage[]
+
+  Booking Booking[]
+
+  Favorite Favorite[]
+}
+
+model Category {
+  category_id Int    @id @default(autoincrement()) @map("category_id")
+  name        String @unique
+
+  Service Service[]
+
+  SubCategory SubCategory[]
+}
+
+model Review {
+  review_id           Int      @id @default(autoincrement()) @map("review_id")
+  rating              Int
+  comment             String
+  user_id             Int      @map("user_id")
+  service_provider_id Int
+  service_id          Int      @map("service_id")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt
+
+  User    User    @relation(fields: [user_id], references: [user_id])
+  Service Service @relation(fields: [service_id], references: [service_id])
+}
+
+model SubCategory {
+  sub_category_id Int       @id @default(autoincrement()) @map("sub_category_id")
+  name            String    @unique
+  category_id     Int       @map("category_id")
+  Categrory       Category  @relation(fields: [category_id], references: [category_id])
+  Service         Service[]
+}
+
+model ServiceImage {
+  image_id   Int     @id @default(autoincrement()) @map("image_id")
+  image      String
+  name       String
+  service_id Int     @map("service_id")
+  Service    Service @relation(fields: [service_id], references: [service_id])
+}
+
+model Admin {
+  admin_id             Int       @id @default(autoincrement()) @map("admin_id")
+  username             String
+  email                String
+  name                 String
+  password             String
+  type                 String?
+  resetPasswordToken   String?
+  resetPasswordExpires DateTime?
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt
+}
+
+model otp {
+  opt_id    Int      @id @default(autoincrement()) @map("opt_id")
+  user_id   Int      @map("user_id")
+  otp       String
+  createdAt DateTime @default(now()) @map("created_at")
+  expireAt  DateTime
+  used      Boolean
+
+  User User @relation(fields: [user_id], references: [user_id])
+}
+
+model Booking {
+  booking_id   Int      @id @default(autoincrement()) @map("booking_id")
+  user_id      Int      @map("user_id")
+  service_id   Int      @map("service_id")
+  provider_id  Int      @map("provider_id")
+  booking_date String
+  status       String
+  amount       String
+  message      String
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt
+  User         User     @relation(fields: [user_id], references: [user_id])
+  Service      Service  @relation(fields: [service_id], references: [service_id])
+}
+
+model State {
+  state_id   String @id
+  name       String
+  state_code String
+
+  District District[]
+}
+
+model District {
+  district_id String @id
+  name        String
+  state_id    String
+  state       State  @relation(fields: [state_id], references: [state_id])
+}
+
+model Favorite {
+  favorite_id Int      @id @default(autoincrement()) @map("favorite_id")
+  user_id     Int      @map("user_id")
+  service_id  Int      @map("service_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt
+
+  User    User    @relation(fields: [user_id], references: [user_id])
+  Service Service @relation(fields: [service_id], references: [service_id])
+}
+
+model Report {
+  report_id   Int      @id @default(autoincrement()) @map("report_id")
+  user_id     Int      @map("user_id")
+  description String
+  category    String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt
+
+  User User @relation(fields: [user_id], references: [user_id])
+}
