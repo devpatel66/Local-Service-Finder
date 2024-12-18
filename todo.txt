@@ -1,5 +1,0 @@
-- search bar services
-- admmin password change
-- today date in booking
-
-npx prisma migrate dev --name init
